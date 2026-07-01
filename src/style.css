@@ -3,17 +3,20 @@
 	margin: 0;
 	padding: 0;
 }
-
 canvas {
 	position: fixed;
 	top: 0;
 	left: 0;
 }
-
 main {
 	background-color: black;
 	color: white;
 	pointer-events: none;
+	display: flex;
+	justify-content: end;
+	align-items: center;
+	flex-direction: column;
+	height: 90vh;
 }
 main > div {
 	position: fixed;
@@ -59,4 +62,25 @@ fieldset > * {
 .loading.hidden {
 	opacity: 0;
 	transition: opacity 1s ease;
+}
+.button {
+	background-color: white;
+	color: black;
+	padding: 8px 15px;
+	border-radius: 3px;
+	display: flex;
+	position: relative;
+	height: fit-content;
+	width: fit-content;
+	font-weight: 600;
+	font-size: 1.8rem;
+	pointer-events: all;
+	cursor: pointer;
+}
+.button:hover {
+	background-color: rgb(184, 184, 184);
+}
+.button.hidden {
+	display: none;
+	pointer-events: none;
 }
