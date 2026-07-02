@@ -9,33 +9,43 @@
   <body>
     <canvas id="bg"></canvas>
     <main>
-      <div class="left">
-        <fieldset class="topleft">
-          <legend>SYSTEM_MANIFEST</legend>
-          <strong>Name</strong><span> : SF-1 WHITE GHOST – Futuristic Starfighter</span><br>
-          <strong>3d Model</strong><span> : by ARTEL_3D</span><br>
-          <strong>Website</strong><span> : sketchfab.com</span><br>
-          <strong>Status</strong><span> : FREE</span>
-        </fieldset>
-        <fieldset class="bottomleft">
-          <legend>MODULE_GEOMETRY</legend>
-          <strong>Triangles</strong><span> : 500K</span><br>
-          <strong>Vertices</strong><span> : 250K</span><br>
-          <strong>Renderer</strong><span> : WebGL_ThreeJS_Core</span><br>
-        </fieldset>
-      </div>
-      <div class="right">
-        <fieldset class="bottomright">
-          <legend>SYS_TELEMETRY</legend>
-          <strong>Speed</strong><pre>  [⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹       ] 68%</pre><br>
-          <strong>Stealth</strong><pre> [⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹  ] 92%</pre><br>
-          <strong>Engine</strong><pre> [⏹⏹⏹⏹⏹                ] 34%</pre><br>
-          <strong>Shield</strong><pre>  [⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹] 100%</pre>
-        </fieldset>
-      </div>
-      <div class="button">START</div>
+      	<div class="left">
+			<fieldset class="topleft">
+				<legend>3D_MODEL</legend>
+				<strong>Title</strong><span> : SF-1 WHITE GHOST – Futuristic Starfighter by ARTEL_3D</span><br>
+				<strong>Website</strong><span> : sketchfab.com</span><br>
+			</fieldset>
+			<fieldset class="bottomleft smoller">
+				<legend>PLAYER_SHIP</legend>
+				<strong>Triangles</strong><span> : 500K</span><br>
+				<strong>Vertices</strong><span> : 250K</span><br>
+			</fieldset>
+      	</div>
+      	<div class="right">
+			<fieldset class="smoller">
+				<legend>CONTROLS</legend>
+				<strong>PC</strong><span> : WASD</span><br>
+				<strong>Mobile: </strong> <span> : Joystick</span>
+			</fieldset>
+			<fieldset class="bottomright">
+				<legend>STATS</legend>
+				<strong>Speed</strong><pre>  [⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹       ] 68%</pre><br>
+				<strong>Stealth</strong><pre> [⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹  ] 92%</pre><br>
+				<strong>Engine</strong><pre> [⏹⏹⏹⏹⏹                ] 34%</pre><br>
+				<strong>Shield</strong><pre>  [⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹] 100%</pre>
+			</fieldset>
+      	</div>
+		<div id="health-ui">
+			HP: 100
+		</div>
+		<div class="button">Test Flight</div>
     </main>
+	<div id="joystick-container">
+		<div id="joystick-base">
+			<div id="joystick-stick"></div>
+		</div>
+	</div>
     <div class="loading"></div>
     <script type="module" src="/src/main.js"></script>
-  </body>
+</body>
 </html>

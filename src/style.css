@@ -35,6 +35,12 @@ main > div:first-child {
 	top: 0;
 	justify-content: start;
 }
+.smoller {
+	width: 160px;
+}
+.right {
+	align-items: end;
+}
 fieldset {
 	padding: 1rem;
 }
@@ -83,4 +89,57 @@ fieldset > * {
 .button.hidden {
 	display: none;
 	pointer-events: none;
+}
+#health-ui {
+	position: fixed;
+	top: 1rem;
+	right: 1rem;
+	color: #00FFDD; 
+	font-family: monospace; 
+	font-size: 24px; 
+	font-weight: bold; 
+	text-shadow: 0 0 10px #00FFDD;
+	z-index: 10;
+	height: fit-content;
+	width: fit-content;
+}
+#joystick-container {
+    position: fixed;
+    bottom: 40px;
+    left: 40px;
+    width: 120px;
+    height: 120px;
+    z-index: 999;
+    display: none; 
+}
+
+@media (pointer: coarse) {
+    #joystick-container {
+        display: block;
+    }
+}
+/* #joystick-container { display: block; } */
+
+#joystick-base {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(0, 255, 221, 0.4);
+    border-radius: 50%;
+    position: relative;
+    touch-action: none;
+    pointer-events: all;
+}
+
+#joystick-stick {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 255, 221, 0.7);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(0, 255, 221, 0.5);
+    pointer-events: none;
 }
