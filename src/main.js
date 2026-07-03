@@ -12,6 +12,7 @@ const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 const renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector('#bg'),
+    alpha: true
 })
 renderer.setPixelRatio(window.devicePixelRatio)
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -19,11 +20,15 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 let gameState = 'MENU'
 let activeObstacles = []
 let obstacleSpawnTimer
-let obstacleHelpers = []
-let playerHelper
-let gameSpeed = 3
+let obstacleSpawnInterval
+let obstacleTimeout
+let gameSpeed = 2.5
 let playerHealth = 100
 let isInvulnerable = false
+let flash_interval
+let speedup
+const playerBox = new THREE.Box3()
+const obstacleBox = new THREE.Box3()
 
 // DOM ELEMENTS
 const start = document.querySelector('.button')
@@ -130,11 +135,6 @@ if (base && stick) {
     base.addEventListener('pointercancel', stopJoystick)
 }
 
-// FIXED BG
-const spaceTexture = new THREE.TextureLoader().load('/techy-bg.jpg')
-spaceTexture.colorSpace = THREE.SRGBColorSpace
-scene.background = spaceTexture
-
 // PARTICLE EFFECT
 const particleCount = 700
 const particleGeometry = new THREE.BufferGeometry()
@@ -179,35 +179,10 @@ function createSemiCircleWall() {
     geo.rotateX(Math.PI / 2)
     return new THREE.Mesh(geo, obstacleMat)
 }
-
-// function createGateWall() {
-//     const group = new THREE.Group()
-//     const leftGeo = new THREE.CylinderGeometry(40, 40, 5, 12, 1, false, 0, 1.1)
-//     leftGeo.rotateX(Math.PI / 2)
-//     const leftMesh = new THREE.Mesh(leftGeo, obstacleMat)
-//     const rightGeo = new THREE.CylinderGeometry(40, 40, 5, 12, 1, false, 2.0, 1.1)
-//     rightGeo.rotateX(Math.PI / 2)
-//     const rightMesh = new THREE.Mesh(rightGeo, obstacleMat)
-//     group.add(leftMesh, rightMesh)
-//     return group
-// }
-
 function createDividerWall() {
     const geo = new THREE.BoxGeometry(80, 12, 5)
     return new THREE.Mesh(geo, obstacleMat)
 }
-
-// function createRingGateWall() {
-//     const geo = new THREE.RingGeometry(20, 40, 32)
-//     const flatRingMat = new THREE.MeshStandardMaterial({ 
-//         color: 0x3a3a3a,
-//         roughness: 0.5,
-//         metalness: 0.8,
-//         side: THREE.DoubleSide
-//     })
-//     const mesh = new THREE.Mesh(geo, flatRingMat)
-//     return mesh
-// }
 
 function spawnObstacle() {
     if (gameState !== 'PLAYING') return
@@ -230,6 +205,35 @@ function spawnObstacle() {
     activeObstacles.push(obstacle)
 }
 
+function dynamicSpawnLoop() {
+    if (gameState !== 'PLAYING') return;
+    spawnObstacle();
+    let currentSpawnDelay = 4000 / gameSpeed; 
+    if (currentSpawnDelay < 300) currentSpawnDelay = 300;
+    obstacleTimeout = setTimeout(dynamicSpawnLoop, currentSpawnDelay);
+}
+
+// SHENANIGANS
+const flash_img = document.querySelector('.flash-img')
+const flash_imgs = [
+    "/cat.jpg",
+    "/cat1.webp",
+    "/cat2.jpg",
+    "/cat3.webp",
+    "/donkey.jpg",
+    "/hart.jpg",
+    "/sunshine.jpg",
+]
+function flash() {
+    const randNum = Math.floor(Math.random() * 20)
+    if (flash_imgs[randNum]) {
+        flash_img.style.backgroundImage = `url(${flash_imgs[randNum]})`
+        setTimeout(() => {
+            flash_img.style.backgroundImage = `url()`
+        }, 150)
+    }
+}
+
 function lobby() {
     gameState = 'MENU'
     controls.enabled = true
@@ -237,17 +241,11 @@ function lobby() {
     playerHealth = 100
     if (healthUI) healthUI.innerText = `HP: 100`
     
-    clearInterval(obstacleSpawnTimer)
+    clearTimeout(obstacleTimeout)
+    clearInterval(flash_interval)
     
     activeObstacles.forEach(obs => scene.remove(obs))
     activeObstacles = []
-    
-    obstacleHelpers.forEach(helper => scene.remove(helper))
-    obstacleHelpers = []
-    if (playerHelper) {
-        scene.remove(playerHelper)
-        playerHelper = null
-    }
     
     if (spaceship) {
         spaceship.position.set(0, 0, 0)
@@ -266,8 +264,19 @@ function startGame() {
     controls.enabled = false
     if (start) start.classList.add('hidden')
     
-    clearInterval(obstacleSpawnTimer);
-    obstacleSpawnTimer = setInterval(spawnObstacle, 1500);
+    gameSpeed = 2.5
+    
+    clearTimeout(obstacleTimeout)
+    dynamicSpawnLoop()
+
+    clearInterval(speedup)
+    speedup = setInterval(() => {
+        gameSpeed += 0.2;
+        console.log(`Speed: ${gameSpeed.toFixed(1)} | Next Spawn Delay: ${(4000 / gameSpeed).toFixed(0)}ms`)
+    }, 3000)
+    
+    clearInterval(flash_interval)
+    flash_interval = setInterval(flash, 5000)
 }
 if (start) start.addEventListener('click', startGame)
 lobby()
@@ -281,13 +290,13 @@ function animate() {
     } else if (gameState === 'PLAYING') {
         if (spaceship) {
             // CAMERA POSITIONING
-            camera.position.x += (spaceship.position.x - camera.position.x) * 0.1
-            camera.position.y += (spaceship.position.y + 5 - camera.position.y) * 0.1
-            camera.position.z += (spaceship.position.z + 24 - camera.position.z) * 0.1
+            camera.position.x += (spaceship.position.x - camera.position.x) * 0.2
+            camera.position.y += (spaceship.position.y + 5 - camera.position.y) * 0.2
+            camera.position.z += (spaceship.position.z + 24 - camera.position.z) * 0.2
             camera.lookAt(spaceship.position)
 
             // PLAYER SHIP MOVEMENT
-            const moveSpeed = 1
+            const moveSpeed = 1.4
             let targetTilt = 0
             if (keys.a) {
                 spaceship.position.x -= moveSpeed
@@ -324,45 +333,33 @@ function animate() {
             if (tunnel.position.z >= 40) {
                 tunnel.position.z = 0 
             }
-            // SET PLAYER SHIP MAX BOUNDS
+
+            // ADD PLAYER MAX BOUNDS
             spaceship.position.x = Math.max(-30, Math.min(30, spaceship.position.x))
             spaceship.position.y = Math.max(-20, Math.min(20, spaceship.position.y))
 
-            // MOVE AND CLEANUP OBSTACLES
-            obstacleHelpers.forEach(helper => scene.remove(helper))
-            obstacleHelpers = []
-            if (playerHelper) scene.remove(playerHelper)
+            // REUSE GLOBAL BOX TO CALCULATE SHIP BOUNDS
+            playerBox.setFromObject(spaceship)
+            playerBox.expandByScalar(-1.5)
 
-            if (spaceship) {
-                const playerBox = new THREE.Box3().setFromObject(spaceship)
-                playerBox.expandByScalar(-1.5)
+
+            for (let i = activeObstacles.length - 1; i >= 0; i--) {
+                const obstacle = activeObstacles[i]
+                obstacle.position.z += gameSpeed
                 
-                // PLAYER HITBOX HELPER
-                // playerHelper = new THREE.Box3Helper(playerBox, 0x00ff00)
-                // scene.add(playerHelper)
+                // REUSE GLOBAL BOX FOR OBSTACLES
+                obstacleBox.setFromObject(obstacle)
+                obstacleBox.expandByScalar(-1.0)
 
-                for (let i = activeObstacles.length - 1; i >= 0; i--) {
-                    const obstacle = activeObstacles[i]
-                    obstacle.position.z += gameSpeed
-                    
-                    const obstacleBox = new THREE.Box3().setFromObject(obstacle)
-                    obstacleBox.expandByScalar(-1.0)
-                    
-                    // OBSTACLE HITBOX HELPER
-                    // const obsHelper = new THREE.Box3Helper(obstacleBox, 0xff0000)
-                    // scene.add(obsHelper)
-                    // obstacleHelpers.push(obsHelper)
-
-                    if (!isInvulnerable) {
-                        if (playerBox.intersectsBox(obstacleBox)) {
-                            takeDamage(25)
-                        }
+                if (!isInvulnerable) {
+                    if (playerBox.intersectsBox(obstacleBox)) {
+                        takeDamage(25)
                     }
+                }
 
-                    if (obstacle.position.z > camera.position.z + 10) {
-                        scene.remove(obstacle)
-                        activeObstacles.splice(i, 1)
-                    }
+                if (obstacle.position.z > camera.position.z + 10) {
+                    scene.remove(obstacle)
+                    activeObstacles.splice(i, 1)
                 }
             }
         }
@@ -397,7 +394,6 @@ function takeDamage(amount) {
 
     // GAME OVER CHECK
     if (playerHealth <= 0) {
-        alert("ded")
         lobby()
         return
     }
@@ -406,5 +402,5 @@ function takeDamage(amount) {
     isInvulnerable = true
     setTimeout(() => {
         isInvulnerable = false
-    }, 1200)
+    }, 1000)
 }
