@@ -353,7 +353,7 @@ function animate() {
 
                 if (!isInvulnerable) {
                     if (playerBox.intersectsBox(obstacleBox)) {
-                        takeDamage(25)
+                        takeDamage(10)
                     }
                 }
 
